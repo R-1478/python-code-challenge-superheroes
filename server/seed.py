@@ -1,9 +1,7 @@
+from sqlalchemy import func
 from app import app
-
-from models import Hero, Power, db
-
-# app = create_app()
-# db = SQLAlchemy(app)
+from models import Hero, Power, HeroPowers, db
+from random import choice, randint
 
 with app.app_context():
     # Seeding logic for Powers
@@ -42,6 +40,23 @@ with app.app_context():
             hero = Hero(name=hero_info["name"], super_name=hero_info["super_name"])
             db.session.add(hero)
 
+            # Adding powers to heroes
+            strengths = ["Strong", "Weak", "Average"]
+            for _ in range(randint(1, 3)):
+                # get a random power
+                power = Power.query.order_by(func.random()).first()
+
+                # Check if hero already has this power
+                existing_power = HeroPowers.query.filter_by(hero_id=hero.id, power_id=power.id).first()
+                if not existing_power:
+                    hero_power = HeroPowers(hero_id=hero.id, power_id=power.id, strength=choice(strengths))
+                    db.session.add(hero_power)
+
     db.session.commit()
+
+    # Check HeroPowers data
+    hero_powers = HeroPowers.query.all()
+    for hp in hero_powers:
+        print(f"Hero {hp.hero.name} has power {hp.power.name} with strength {hp.strength}")
 
     print("🦸‍♀️ Done seeding!")

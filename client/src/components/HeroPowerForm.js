@@ -1,97 +1,48 @@
 import { useEffect, useState } from "react";
-import { useHistory } from "react-router";
+import { Link, useParams } from "react-router-dom";
 
-function HeroPowerForm() {
-  const [heroes, setHeroes] = useState([]);
-  const [powers, setPowers] = useState([]);
-  const [heroId, setHeroId] = useState("");
-  const [powerId, setPowerId] = useState("");
-  const [strength, setStrength] = useState("");
-  const [formErrors, setFormErrors] = useState([]);
-  const history = useHistory();
-
-  useEffect(() => {
-    fetch("/heroes")
-      .then((r) => r.json())
-      .then(setHeroes);
-  }, []);
+function Hero() {
+  const [{ data: hero, error, status }, setHero] = useState({
+    data: null,
+    error: null,
+    status: "pending",
+  });
+  const { id } = useParams();
 
   useEffect(() => {
-    fetch("/powers")
-      .then((r) => r.json())
-      .then(setPowers);
-  }, []);
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    const formData = {
-      hero_id: heroId,
-      power_id: powerId,
-      strength,
-    };
-    fetch("/hero_powers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    }).then((r) => {
+    fetch(`/heroes/${id}`).then((r) => {
       if (r.ok) {
-        history.push(`/heroes/${heroId}`);
+        r.json().then((hero) =>
+          setHero({ data: hero, error: null, status: "resolved" })
+        );
       } else {
-        r.json().then((err) => setFormErrors(err.errors));
+        r.json().then((err) =>
+          setHero({ data: null, error: err.error, status: "rejected" })
+        );
       }
     });
-  }
+  }, [id]);
+
+  if (status === "pending") return <h1>Loading...</h1>;
+  if (status === "rejected") return <h1>Error: {error.error}</h1>;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="power_id">Power:</label>
-      <select
-        id="power_id"
-        name="power_id"
-        value={powerId}
-        onChange={(e) => setPowerId(e.target.value)}
-      >
-        <option value="">Select a power</option>
-        {powers.map((power) => (
-          <option key={power.id} value={power.id}>
-            {power.name}
-          </option>
+    <section>
+      <h2>{hero.super_name}</h2>
+      <h2>AKA {hero.name}</h2>
+
+      <h3>Powers:</h3>
+      <ul>
+        {hero.powers.map((power) => (
+          <li key={hero.id}>
+            <Link to={`/powers/${power.id}`}>{power.name}</Link>
+          </li>
         ))}
-      </select>
-      <label htmlFor="hero_id">Hero:</label>
-      <select
-        id="hero_id"
-        name="hero_id"
-        value={heroId}
-        onChange={(e) => setHeroId(e.target.value)}
-      >
-        <option value="">Select a hero</option>
-        {heroes.map((hero) => (
-          <option key={hero.id} value={hero.id}>
-            {hero.name}
-          </option>
-        ))}
-      </select>
-      <label htmlFor="strength">Strength:</label>
-      <input
-        type="text"
-        id="strength"
-        name="strength"
-        value={strength}
-        onChange={(e) => setStrength(e.target.value)}
-      />
-      {formErrors.length > 0
-        ? formErrors.map((err) => (
-            <p key={err} style={{ color: "red" }}>
-              {err}
-            </p>
-          ))
-        : null}
-      <button type="submit">Add Hero Power</button>
-    </form>
+      </ul>
+
+      <Link to="/hero_powers/new">Add Hero Power</Link>
+    </section>
   );
 }
 
-export default HeroPowerForm;
+export default Hero;
