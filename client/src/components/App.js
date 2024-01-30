@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Header from "./components/Header";
-import Hero from "./components/Hero";
-import Home from "./components/Home";
-import HeroPowerForm from "./components/HeroPowerForm";
-import Power from "./components/Power";
-import PowerEditForm from "./components/PowerEditForm";
+import Header from "./Header";
+import Hero from "./Hero";
+import Home from "./Home";
+import HeroPowerForm from "./HeroPowerForm";
+import Power from "./Power";
+import PowerEditForm from "./PowerEditForm";
 
 function App() {
   return (
