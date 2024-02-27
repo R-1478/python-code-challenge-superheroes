@@ -13,7 +13,7 @@ function Hero() {
     fetch(`/heroes/${id}`).then((r) => {
       if (r.ok) {
         r.json().then((hero) =>
-          setHero({ data: hero, error: null, status: "resolved" })
+          setHero({ data: [hero], error: null, status: "resolved" })
         );
       } else {
         r.json().then((err) =>
@@ -28,17 +28,21 @@ function Hero() {
 
   return (
     <section>
-      <h2>{hero.super_name}</h2>
-      <h2>AKA {hero.name}</h2>
+      <h2>{hero[0].super_name}</h2>
+      <h2>AKA {hero[0].name}</h2>
 
       <h3>Powers:</h3>
-      <ul>
-        {hero.powers.map((power) => (
-          <li key={hero.id}>
-            <Link to={`/powers/${power.id}`}>{power.name}</Link>
-          </li>
-        ))}
-      </ul>
+      {hero[0].powers ? ( // Check if hero[0].powers is defined
+        <ul>
+          {hero[0].powers.map((power) => (
+            <li key={power.id}>
+              <Link to={`/powers/${power.id}`}>{power.name}</Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No powers available</p>
+      )}
 
       <Link to="/hero_powers/new">Add Hero Power</Link>
     </section>

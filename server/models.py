@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import validates
 
 db = SQLAlchemy()
 class Hero(db.Model):
@@ -29,3 +30,11 @@ class Power(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime)
     
+@validates('description')
+def validate_description(self, key, description):
+        if not description:
+            raise ValueError("Description must be provided.")
+        if len(description) > 255:
+            raise ValueError("Description must be at most 255 characters long.")
+        return description
+# powers are validated in the post block(app.py:113)
